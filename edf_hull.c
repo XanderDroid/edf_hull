@@ -91,9 +91,9 @@ void edf_create_points(const ts_t *cur_task_set, edf_points_t *cur_points) {
 
     /* store the sum Ui <= 1 constraint */
     cur_points->t0[point_count] = 0;
-    cur_points->t1[point_count] = 1;
+    cur_points->t1[point_count] = cur_task_set->h_per;
     for (i = 0; i < N; i++) {
-      cur_points->vec_p[point_count * N + i] = 1 / T(i);
+      cur_points->vec_p[point_count * N + i] = (int)(cur_task_set->h_per / T(i));
     }
     point_count++;
 
@@ -167,9 +167,9 @@ void edf_create_points(const ts_t *cur_task_set, edf_points_t *cur_points) {
 
     /* store the sum Ui <= 1 constraint */
     cur_points->t0[point_count] = 0;
-    cur_points->t1[point_count] = 1;
+    cur_points->t1[point_count] = cur_task_set->h_per;
     for (i = 0; i < N; i++) {
-      cur_points->vec_p[point_count * N + i] = 1 / T(i);
+      cur_points->vec_p[point_count * N + i] = (int)(cur_task_set->h_per / T(i));
     }
     point_count++;
 
