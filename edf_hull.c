@@ -32,12 +32,19 @@ void edf_create_points(const ts_t *cur_task_set, edf_points_t *cur_points) {
   /* store the number of tasks */
   cur_points->num_tasks = N;
 
-  /* Set the limit until which computing the points */
+  /* Reserve one point for sum_i U_i <= 1, N points for the Ci >= 0 */
+  reserve_p = N + 1;
+
+  /* Limit until which computing the points + number of points */
   if (cur_task_set->has_phi) {
     big_enough =
         2 * cur_task_set->h_per + cur_task_set->max_d + cur_task_set->max_o;
+    /* the number of points (overestimating it) */
+    cur_points->num_points = reserve_p + num_deadline * num_deadline;
   } else {
     big_enough = cur_task_set->h_per + cur_task_set->max_d;
+    /* the number of points */
+    cur_points->num_points = reserve_p + num_deadline;
   }
 
   /*
@@ -51,56 +58,44 @@ void edf_create_points(const ts_t *cur_task_set, edf_points_t *cur_points) {
     num_deadline += max_job[i] + 1;
   }
 
-  /*
-   * Start computing the points. Reserve the initial point for a
-   * special purpose. The number of reserved points is reserv_p.
-   */
-  /* Reserve one point for sum_i U_i <= 1, N points for the Ci >= 0 */
-  reserve_p = N + 1;
+  /* allocate the t0, t1 data structure for the points */
+  if (cur_points->num_points > cur_points->alloc_points) {
+    cur_points->t0 =
+      (double *)realloc(cur_points->t0, sizeof(double) * cur_points->num_points);
+    cur_points->t1 =
+      (double *)realloc(cur_points->t1, sizeof(double) * cur_points->num_points);
+    cur_points->vec_p =
+      (double *)realloc(cur_points->vec_p, sizeof(double) * cur_points->num_points * N);
+    cur_points->alloc_points = cur_points->num_points;
+  }
+
+  /* Start computing the points. */
+  /* initialize the point counter */
+  point_count = 0;
+
+  /* store the -Ci <= 0 constraint */
+  for (i = 0; i < N; i++) {
+    cur_points->t0[point_count] = 0;
+    cur_points->t1[point_count] = 0;
+    for (j = 0; j < N; j++) {
+      cur_points->vec_p[point_count * N + j] = ((i == j) ? -1 : 0);
+    }
+    
+    /* increment the point counter */
+    point_count++;
+  }
+  
+  /* store the sum Ui <= 1 constraint */
+  cur_points->t0[point_count] = 0;
+  cur_points->t1[point_count] = cur_task_set->h_per;
+  for (i = 0; i < N; i++) {
+    cur_points->vec_p[point_count * N + i] = (int)(cur_task_set->h_per / T(i));
+  }
+  point_count++;
 
   /* if we have offset the points can be really many */
   if (cur_task_set->has_phi) {
-    /* the number of points (overestimating it) */
-    cur_points->num_points = reserve_p + num_deadline * num_deadline;
-
-    if (cur_points->num_points > cur_points->alloc_points) {
-      /* allocate the t0, t1 data structure for the points */
-      cur_points->t0 = (double *)realloc(
-          cur_points->t0, sizeof(double) * cur_points->num_points);
-      cur_points->t1 = (double *)realloc(
-          cur_points->t1, sizeof(double) * cur_points->num_points);
-      cur_points->vec_p = (double *)realloc(
-          cur_points->vec_p, sizeof(double) * cur_points->num_points * N);
-      cur_points->alloc_points = cur_points->num_points;
-    }
-
-    /* initialize the point counter */
-    point_count = 0;
-
-    /* store the -Ci <= 0 constraint */
-    for (i = 0; i < N; i++) {
-      cur_points->t0[point_count] = 0;
-      cur_points->t1[point_count] = 0;
-      for (j = 0; j < N; j++) {
-        cur_points->vec_p[point_count * N + j] = ((i == j) ? -1 : 0);
-      }
-
-      /* increment the point counter */
-      point_count++;
-    }
-
-    /* store the sum Ui <= 1 constraint */
-    cur_points->t0[point_count] = 0;
-    cur_points->t1[point_count] = cur_task_set->h_per;
-    for (i = 0; i < N; i++) {
-      cur_points->vec_p[point_count * N + i] = (int)(cur_task_set->h_per / T(i));
-    }
-    point_count++;
-
-    /*
-     * compute the points corresponding to the (start
-     * time, deadline) pairs
-     */
+    /* compute the points corresponding to the (start time, deadline) pairs */
     /* loop on the absolute deadlines */
     for (i = 0; i < N; i++) {
       for (j = 0; j <= max_job[i]; j++) {
