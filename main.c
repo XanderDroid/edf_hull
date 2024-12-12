@@ -232,6 +232,7 @@ int main(int argc, char *argv[]) {
 }
 
 void iterate_random_mode() {
+  int i;
   char *filename = malloc(MAX_SIZE_STR_FILENAME);
 
   create_descriptive_filename(filename);
@@ -245,13 +246,13 @@ void iterate_random_mode() {
 
   /*Printing header of csv file*/
   fprintf(arguments.rand_setup.fp_stats_csv, "Seed,");
-  for (int i = 1; i <= arguments.rand_setup.num; i++) {
+  for (i = 1; i <= arguments.rand_setup.num; i++) {
     fprintf(arguments.rand_setup.fp_stats_csv, "T%d,D%d,Ratio%d,", i, i, i);
   }
   fprintf(arguments.rand_setup.fp_stats_csv,
           "H,m,Original_m,Percentage_m,Command\n");
 
-  for (int i = 0; i < arguments.rand_setup.n_repeat; i++) {
+  for (i = 0; i < arguments.rand_setup.n_repeat; i++) {
     if (i == 1) {
       printf("[edf_hull] Printing %d row(s) on file \'./%s\'\n",
              arguments.rand_setup.n_repeat, filename);
@@ -597,14 +598,14 @@ void edf_print_additional_info_on_csv(edf_points_t *my_points,
 
   /*Printing header of csv file*/
   fprintf(fp, "Seed,");
-  for (int i = 1; i <= my_task_set->num; i++) {
+  for (i = 1; i <= my_task_set->num; i++) {
     fprintf(fp, "T%d,D%d,Ratio%d,a_%i,", i, i, i, i);
   }
   fprintf(fp, "t,");
-  for (int i = 1; i <= my_task_set->num; i++) {
+  for (i = 1; i <= my_task_set->num; i++) {
     fprintf(fp, "diff%d,", i);
   }
-  for (int i = 1; i <= my_task_set->num; i++) {
+  for (i = 1; i <= my_task_set->num; i++) {
     fprintf(fp, "task%d_gen_t,", i);
   }
   fprintf(fp, "H,m,Command\n");
@@ -614,7 +615,7 @@ void edf_print_additional_info_on_csv(edf_points_t *my_points,
     fprintf(fp, "%d,", seed);
 
     /*Printing T_i, D_i and Ratio D_i/T_i and a_i on csv*/
-    for (int j = 0; j < my_task_set->num; j++) {
+    for (j = 0; j < my_task_set->num; j++) {
       fprintf(fp, "%.0f,%f,%f,%.17g,", my_task_set->per[j], my_task_set->dl[j],
               my_task_set->dl[j] / my_task_set->per[j],
               (my_points->vec_p[IND * my_points->num_tasks + j] * P_j) /
@@ -664,6 +665,7 @@ void edf_print_additional_info_on_csv(edf_points_t *my_points,
 
 void edf_print_stats_on_csv(const ts_rand_t *settings, edf_points_t *my_points,
                             const ts_t *my_task_set) {
+  int i;
   double percentage_of_constraints =
       (double)(my_points->num_sel) / (double)(my_points->num_points);
 
@@ -671,7 +673,7 @@ void edf_print_stats_on_csv(const ts_rand_t *settings, edf_points_t *my_points,
   fprintf(settings->fp_stats_csv, "%d,", settings->seed);
 
   /*Printing T_i, D_i and Ratio D_i/T_i on csv*/
-  for (int i = 0; i < settings->num; i++) {
+  for (i = 0; i < settings->num; i++) {
     fprintf(settings->fp_stats_csv, "%.0f,%f,%f,", my_task_set->per[i],
             my_task_set->dl[i], my_task_set->dl[i] / my_task_set->per[i]);
   }
