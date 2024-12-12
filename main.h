@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 #define LEN(v) (sizeof(v) / sizeof(v[0]))
 

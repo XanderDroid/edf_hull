@@ -3,13 +3,7 @@
 
 #include <strings.h>
 
-#include "modules/qhull/src/libqhull_r/libqhull_r.h"
-#include "modules/qhull/src/libqhull_r/mem_r.h"
-#include "modules/qhull/src/libqhull_r/qhull_ra.h"
 #include "ts_lib.h" /* task set basic routines */
-
-/* Qhull global data structure necessary to cut points */
-extern qhT qh_qh;
 
 /*
  * Data structure  storing the  interval info.  For each  interval the
@@ -26,10 +20,7 @@ typedef struct {
   double *t0;       /* starting point */
   double *t1;       /* finishing point */
   double *vec_p;    /* array of coefficients */
-  double interior;  /* the point interior*[1,1,...,1] is in
-           the interior */
-  coordT *qh_vec_p; /* array given to qhull */
-  int num_sel;      /* number of selected points (by qhull) */
+  int num_sel;      /* number of selected points */
   int *vec_sel;     /* indexes of selected points */
 } edf_points_t;
 
@@ -76,11 +67,9 @@ void edf_print_constraints_U(const ts_t *cur_task_set,
                              const edf_points_t *cur_points);
 
 /*
- * It selects the only necessary points using a geometric
- * reasoning. The algorithm for computing the convex hull is invoked through
- * a function internal to the API .
+ * It selects the only necessary points using linear programming.
  */
-double edf_qhull_points(edf_points_t *cur_points);
+double edf_linprog_points(edf_points_t *cur_points);
 
 /*
  * Free the data structure storing the points

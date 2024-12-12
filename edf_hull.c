@@ -11,7 +11,6 @@ void edf_set_zero(edf_points_t *cur_points) {
   cur_points->t0 = NULL;
   cur_points->t1 = NULL;
   cur_points->vec_p = NULL;
-  cur_points->qh_vec_p = NULL;
   cur_points->num_sel = 0;
   cur_points->vec_sel = NULL;
 }
@@ -23,10 +22,11 @@ void edf_create_points(const ts_t *cur_task_set, edf_points_t *cur_points) {
 #define O(i) (cur_task_set->phi[i])
 
   unsigned long *max_job;
-  int i, j, k, reserve_p, s_i, s_j;
+  unsigned long i, j, k, s_i, s_j;
+  int reserve_p;
   int num_deadline;
   int point_count;
-  double cur_t, cur_s, coef, sum_rate;
+  double cur_t, cur_s, coef;
   double big_enough;
 
   /* store the number of tasks */
@@ -71,9 +71,6 @@ void edf_create_points(const ts_t *cur_task_set, edf_points_t *cur_points) {
           cur_points->t1, sizeof(double) * cur_points->num_points);
       cur_points->vec_p = (double *)realloc(
           cur_points->vec_p, sizeof(double) * cur_points->num_points * N);
-      /* The points to be used are in cur_points->qh_vec_p */
-      cur_points->qh_vec_p = (coordT *)realloc(
-          cur_points->qh_vec_p, sizeof(coordT) * cur_points->num_points * N);
       cur_points->alloc_points = cur_points->num_points;
     }
 
@@ -150,9 +147,6 @@ void edf_create_points(const ts_t *cur_task_set, edf_points_t *cur_points) {
           cur_points->t1, sizeof(double) * cur_points->num_points);
       cur_points->vec_p = (double *)realloc(
           cur_points->vec_p, sizeof(double) * cur_points->num_points * N);
-      /* The points to be used are in cur_points->qh_vec_p */
-      cur_points->qh_vec_p = (coordT *)realloc(
-          cur_points->qh_vec_p, sizeof(coordT) * cur_points->num_points * N);
       cur_points->alloc_points = cur_points->num_points;
     }
 
@@ -201,12 +195,6 @@ void edf_create_points(const ts_t *cur_task_set, edf_points_t *cur_points) {
       }
     }
   }
-  /* compute the interior for traslation purpose */
-  sum_rate = 0;
-  for (i = 0; i < N; i++) {
-    sum_rate += 1 / (T(i) < D(i) ? T(i) : D(i));
-  }
-  cur_points->interior = 1 / (2 * sum_rate);
 
   /* free the max_job which is only a local data structure */
   free(max_job);
@@ -214,39 +202,6 @@ void edf_create_points(const ts_t *cur_task_set, edf_points_t *cur_points) {
 #undef T
 #undef D
 #undef O
-}
-
-/*
- * Translate the points so that the origin belongs to the interior.
- * The translated vectors are written to the array
- * cur_points->qh_vec_p
- */
-static void trans_points(edf_points_t *cur_points) {
-  int i, j;
-  double sum_coef, sum_rate, mul_factor;
-
-  /* all the points */
-  for (i = 0; i < cur_points->num_points; i++) {
-    /* compute the sum of all the coefficients of the
-     * current vector */
-    sum_coef = 0;
-    for (j = 0; j < cur_points->num_tasks; j++) {
-      sum_coef += cur_points->vec_p[i * cur_points->num_tasks + j];
-    }
-
-    /*
-     * the  vector  coefficients  are  multiplied  by  the
-     * following factor.  Due to  the proper  selection on
-     * the interior  point, this  factor should  ALWAYS be
-     * GREATER than zero .
-     */
-    mul_factor = 1 / (cur_points->t1[i] - cur_points->t0[i] -
-                      cur_points->interior * sum_coef);
-    for (j = 0; j < cur_points->num_tasks; j++) {
-      cur_points->qh_vec_p[i * cur_points->num_tasks + j] =
-          cur_points->vec_p[i * cur_points->num_tasks + j] * mul_factor;
-    }
-  }
 }
 
 void edf_print_constraints_C(const edf_points_t *cur_points) {
@@ -265,117 +220,50 @@ void edf_print_constraints_C(const edf_points_t *cur_points) {
   }
 }
 
-/**
- * Fills array vec_sel with indexes of the selected points. Makes use of
- * a set data structure to sort vertices by id.
- */
-void edf_array_indexes(qhT *qh, int *arr) {
-  setT *vertices, *points;
-  pointT *point;
-  vertexT *vertex, **vertexp;
-  int id, count_points = 0;
-  int numpoints = 0, point_i, point_n;
-  int allpoints = qh->num_points + qh_setsize(qh, qh->other_points);
+double edf_linprog_points(edf_points_t *cur_points) {
+  unsigned int i, j;
+  double total_t;
 
-  points = qh_settemp(qh, allpoints);
-  qh_setzero(qh, points, 0, allpoints);
-  vertices = qh_facetvertices(qh, qh->facet_list, NULL, 0);
-  FOREACHvertex_(vertices) {
-    id = qh_pointid(qh, vertex->point);
-    if (id >= 0) {
-      SETelem_(points, id) = vertex->point;
-      numpoints++;
+  printf("@Alessandro: FIXME START\n");
+  printf("Istruzioni:\n");
+  printf("1. nella funzione edf_linprog_points trovi questo codice\n");
+  printf("\n2. tutti i vincoli sono scritti nel seguente formato\n");
+  printf("\ta_1*U_1 +a_2*U_2 + ... +a_N*U_N <= RHS\n");
+  printf("\n3. vincoli -Ci <= 0 (vedi te se serve aggiungerli esplicitamente)\n");
+  for (i = 0; i < cur_points->num_tasks; i++) {
+    for (j = 0; j < cur_points->num_tasks; j++) {
+      printf("%.4f\t", cur_points->vec_p[i * cur_points->num_tasks + j]);
     }
+    printf("\t\t%6f\n", cur_points->t1[i]-cur_points->t0[i]);   /* RHS */
   }
-  qh_settempfree(qh, &vertices);
-  FOREACHpoint_i_(qh, points) {
-    if (point) {
-      arr[count_points] = point_i;
-      count_points++;
+  printf("\n4. vincolo sum Ci <= 1 (primo vincolo sicuro)\n");
+  for (j = 0; j < cur_points->num_tasks; j++) {
+    printf("%.4f\t", cur_points->vec_p[i * cur_points->num_tasks + j]);
+  }
+  printf("\t\t%6f\n", cur_points->t1[i]-cur_points->t0[i]);   /* RHS */
+  i++;    /* Move to next constraint */
+  printf("\n5. seguono i vincoli delle deadline che vanno aggiungi uno alla volta\n");
+  for (/* i */; i < cur_points->num_points; i++) {
+    for (j = 0; j < cur_points->num_tasks; j++) {
+      printf("%.4f\t", cur_points->vec_p[i * cur_points->num_tasks + j]);
     }
+    printf("\t\t%6f\n", cur_points->t1[i]-cur_points->t0[i]);   /* RHS */
   }
-  qh_settempfree(qh, &points);
-}
-
-/*
- * Uses the API of qhull to calculate the convex hull.
- * Returns the CPU computing time to obtain the output.
- */
-double edf_qhull_points(edf_points_t *cur_points) {
-#define DIM (cur_points->num_tasks)
-#define TOTpoints (cur_points->num_points)
-#define SIZEobj (1 >> DIM)
-  int dim = DIM; /* dimension of points */
-  int numpoints; /* number of points */
-  /* coordT points[(DIM + 1) * TOTpoints]; array of coordinates for each point
-   */
-  coordT **rows;
-  boolT ismalloc = True;  /* True if qhull should free points in qh_freeqhull()
-                             or reallocation */
-  char flags[250];        /* option flags for qhull, see qh-quick.htm */
-  FILE *outfile = NULL;   /* output from qh_produce_output()
-                               use NULL to skip qh_produce_output() */
-  FILE *errfile = stderr; /* error messages from qhull code */
-  int exitcode;           /* 0 if no error from qhull */
-  facetT *facet;          /* set by FORALLfacets */
-  int curlong,
-      totlong; /* memory remaining after qh_memfreeshort, used if !qh_NOmem  */
-  int i;
-  double total_t; /* CPU computing time to build the convex hull*/
-
-  qhT qh_qh; /* Qhull's data structure.  First argument of most calls */
-  qhT *qh = &qh_qh;
-
-  rows = malloc(TOTpoints * sizeof(coordT *));
-
-  QHULL_LIB_CHECK
-
-  qh_zero(qh, errfile); /*initialize Qhull memory*/
-
-  sprintf(flags, "qhull Fx");
-
-  /* Translate the points to have the origin within the interior */
-  trans_points(cur_points);
-
-  /* Position points in a matrix , an input format required by qh_new_qhull */
-  numpoints = cur_points->num_points;
-  for (i = numpoints; i--;) {
-    rows[i] = cur_points->qh_vec_p + dim * i;
+  printf("\n6. alla fine, bisogna aggiornare:\n");
+  printf("\tcur_points->num_sel con il numero di vincoli selezionati\n");
+  printf("\tcur_points->vec_sel array con indici punti selezionati\n");
+  /* FIXME: place-holder, just selecting all points */
+  cur_points->num_sel = cur_points->num_points;
+  cur_points->vec_sel = malloc(sizeof(*cur_points->vec_sel)
+			       *cur_points->num_sel);
+  for(i=0; i<cur_points->num_sel; i++) {
+    cur_points->vec_sel[i]=i;
   }
-  exitcode = qh_new_qhull(qh, dim, numpoints, cur_points->qh_vec_p, ismalloc,
-                          flags, outfile, errfile);
+  printf("@Alessandro: FIXME END\n");
+  
+  
+  total_t = -1; /* FIXME: should be amount of consumed time  */
 
-  /*
-   * At this point the solution is stored as follows (more
-   * details in qhull-src/src/libqhull_r/libqhull_r.h for the
-   * detailed description of the struct):
-   *   qh->num_vertices: number of vertices in the hull
-   *   qh->vertex_list: pointer to the head of a double linked list
-   *   qh->vertex_tail: pointer to a dummy node after the last one
-   *
-   * For each vertex in the list pointed by p (for example
-   * starting from qh->vertex_list), the coordinates are listed
-   * starting from:
-   *   p->point
-   */
-  if (!exitcode) { /* if no error */
-    cur_points->num_sel = qh->num_vertices;
-    cur_points->vec_sel = (int *)malloc(sizeof(int) * (cur_points->num_sel));
-    edf_array_indexes(qh, cur_points->vec_sel);
-  }
-
-  /*Qhull records number of clocks to complete computation in qh->hulltime*/
-  total_t = (double)(qh->hulltime) / CLOCKS_PER_SEC;
-
-  qh_freeqhull(qh, !qh_ALL); /* free long memory  */
-  qh_memfreeshort(qh, &curlong,
-                  &totlong); /* free short memory and memory allocator */
-  if (curlong || totlong)
-    fprintf(errfile,
-            "qhull internal warning: did not free %d bytes of long memory (%d "
-            "pieces)\n",
-            totlong, curlong);
-  free(rows);
   return total_t;
 }
 
@@ -401,15 +289,20 @@ void edf_print_constraints_U(const ts_t *cur_task_set,
   for (i = 0; i < cur_points->num_sel; i++) {
     for (j = 0; j < cur_points->num_tasks; j++) {
       if (i < cur_points->num_tasks) {
-        printf("%.4f\t",
-               cur_points->vec_p[IND * cur_points->num_tasks + j] * (1 / T(j)));
+	/* Special case of -Ci <= 0 constraint */
+        printf("%.4f\t", cur_points->vec_p[IND * cur_points->num_tasks + j]);
       } else {
+	/* Other constraints: the 1st one is tot util<=1 */
         printf("%.4f\t",
                (cur_points->vec_p[IND * cur_points->num_tasks + j] * T(j)) /
                    cur_points->t1[IND]);
       }
     }
-    printf("1\t%.0f\n", cur_points->t0[IND]);
+    if (i < cur_points->num_tasks) {
+      printf("0\t%.0f\n", cur_points->t0[IND]);
+    } else {
+      printf("1\t%.0f\n", cur_points->t0[IND]);
+    }
 
 #undef T
   }
@@ -420,7 +313,6 @@ void edf_print_points(const edf_points_t *cur_points) {
 
   printf("Number of tasks:\t%d\n", cur_points->num_tasks);
   printf("Number of points:\t%d\n", cur_points->num_points);
-  printf("Interior:\t\t%f\n", cur_points->interior);
   printf("Points:\n");
   for (i = 0; i < cur_points->num_points; i++) {
     printf("t0=%.3f\tt1=%.3f", cur_points->t0[i], cur_points->t1[i]);

@@ -11,7 +11,7 @@
  * parameters. This is for efficiency.
  */
 typedef struct {
-  int num;             /* number of tasks */
+  unsigned int num;             /* number of tasks */
   double *per;         /* periods */
   double *dl;          /* rel. deadline (even > period) */
   double *phi;         /* offsets (in [0,period)) */
@@ -38,8 +38,8 @@ typedef enum {
  * activated*/
 typedef struct {
   per_method_t per_m; /* method for period generation */
-  dl_method_t dl_m;   /*method for deadline generation*/
-  int num;            /* number of tasks to be generated */
+  dl_method_t dl_m;   /* method for deadline generation*/
+  unsigned int num;   /* number of tasks to be generated */
   unsigned int seed;  /* seed for random num generator */
   double per_min;     /* stored in double, may be integers */
   double per_max;     /* stored in double, may be integers */
@@ -47,7 +47,7 @@ typedef struct {
   double norm_dl_var; /* norm_dl is in [avg-var,avg+var] */
   int phasing;        /* 1 if offset; 0 if not */
   double eps;         /* (t_1-t_0)/t_1 < eps => t_1, t_0 are same */
-  int n_repeat;       /*number of tasks set randomly generated given the same
+  int n_repeat;       /* number of tasks set randomly generated given the same
                          specifications*/
   FILE *fp_stats_csv; /*file pointer for the csv file listing at
                       each row the task set specifications and the

@@ -28,7 +28,8 @@
 static void compute_hyperperiod(ts_t *cur_ts) {
   unsigned long *jobs;
   double *multi;
-  int id_max = 0, id_min = 0, i;
+  int id_max = 0, id_min = 0;
+  unsigned int i;
 
   /* Number of jobs per task within (current) hyperperiod  */
   jobs = malloc(sizeof(*jobs) * N);
@@ -68,7 +69,7 @@ static void compute_hyperperiod(ts_t *cur_ts) {
  * Compute the maximum deadline and offset
  */
 static void store_max_dl_phi(ts_t *cur_ts) {
-  int i;
+  unsigned int i;
 
   /* Computing max deadline and max offset */
   cur_ts->max_d = D(0);
@@ -96,7 +97,7 @@ void ts_realloc(ts_t *cur_ts) {
 }
 
 void ts_read_alloc(ts_t *cur_ts, char *input_filename) {
-  int i, num;
+  unsigned int i, num;
   double cur_T, cur_D, cur_O;
   int cur_phasing;
 
@@ -109,7 +110,7 @@ void ts_read_alloc(ts_t *cur_ts, char *input_filename) {
   cur_phasing = 0;
 
   /* read the number of tasks */
-  fscanf(file_ptr, "%d", &num);
+  fscanf(file_ptr, "%u", &num);
   if (N != num) {
     N = num;
     /* Now alloc proper amount */
@@ -140,7 +141,7 @@ void ts_read_alloc(ts_t *cur_ts, char *input_filename) {
 }
 
 void ts_rand(ts_t *cur_ts, const ts_rand_t *settings) {
-  int i;
+  unsigned int i;
 
   switch (settings->per_m) {
   case per_null:
@@ -197,7 +198,7 @@ void ts_rand(ts_t *cur_ts, const ts_rand_t *settings) {
 }
 
 void ts_print(const ts_t *cur_ts) {
-  int i;
+  unsigned int i;
 
   printf("\nThe task set is %s phasing\n", IS_PHI ? "WITH" : "WITHOUT");
   printf(" i: (      Ti,       Di,       Oi)\n");

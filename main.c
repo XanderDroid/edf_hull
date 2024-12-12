@@ -401,7 +401,7 @@ void main_file_mode(char *input_filename) {
   ts_t my_task_set;
   edf_points_t my_points;
   struct timespec start, check;
-  double time_points, time_qhull;
+  double time_points, time_hull;
 
   /* Initialization */
   ts_set_zero(&my_task_set);
@@ -420,10 +420,9 @@ void main_file_mode(char *input_filename) {
   if (arguments.verbose) { /* verbose output*/
     edf_print_points(&my_points);
   }
-  time_qhull = edf_qhull_points(&my_points);
-  edf_print_constraints_C(&my_points);
+  time_hull = edf_linprog_points(&my_points);
   edf_print_constraints_U(&my_task_set, &my_points);
-  edf_print_stats(&my_points, &my_task_set, time_points, time_qhull);
+  edf_print_stats(&my_points, &my_task_set, time_points, time_hull);
   if (arguments.add_constraints_info)
     edf_print_additional_info_on_csv(&my_points, &my_task_set, NO_SEED);
   edf_free_points(&my_points);
@@ -439,7 +438,7 @@ void main_rand_mode() {
   size_t dim = 0;
   int i = 0;
   struct timespec start, check;
-  double time_points, time_qhull;
+  double time_points, time_hull;
 
   /* Initialization */
   ts_set_zero(&my_task_set);
@@ -463,12 +462,12 @@ void main_rand_mode() {
     /* verbose output*/
     edf_print_points(&my_points);
   }
-  time_qhull = edf_qhull_points(&my_points);
+  time_hull = edf_linprog_points(&my_points);
 
   if (rand_setup.n_repeat == 1) {
     edf_print_constraints_C(&my_points);
     edf_print_constraints_U(&my_task_set, &my_points);
-    edf_print_stats(&my_points, &my_task_set, time_points, time_qhull);
+    edf_print_stats(&my_points, &my_task_set, time_points, time_hull);
   } else {
     edf_print_stats_on_csv(&rand_setup, &my_points, &my_task_set);
   }
@@ -503,7 +502,7 @@ void main_constraints_info() {
   if (arguments.verbose) { /* verbose output*/
     edf_print_points(&my_points);
   }
-  edf_qhull_points(&my_points);
+  edf_linprog_points(&my_points);
   edf_print_additional_info_on_csv(&my_points, &my_task_set, rand_setup.seed);
 
   /*Free memory*/
