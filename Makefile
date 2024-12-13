@@ -8,7 +8,7 @@ edf_hull.o: edf_hull.c edf_hull.h Makefile
 	$(CC) -c $(CFLAGS)  edf_hull.c -o edf_hull.o
 
 edf_hull: edf_hull.o ts_lib.o main.c main.h  Makefile
-	$(CC) -g -O0  main.c edf_hull.o ts_lib.o -lm -o edf_hull
+	$(CC) -g -O0  main.c edf_hull.o ts_lib.o -lglpk -lm -o edf_hull
 
 clean:
 	rm -rf *.o *~ edf_hull edf_debug_qhull.txt

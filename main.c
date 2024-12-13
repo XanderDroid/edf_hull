@@ -421,7 +421,13 @@ void main_file_mode(char *input_filename) {
   if (arguments.verbose) { /* verbose output*/
     edf_print_points(&my_points);
   }
-  time_hull = edf_linprog_points(&my_points);
+
+  clock_gettime(CLOCK_MONOTONIC, &start);
+  edf_linprog_points(&my_points, 1);
+  clock_gettime(CLOCK_MONOTONIC, &check);
+  time_hull =
+      (check.tv_nsec - start.tv_nsec) * 1e-9 + (check.tv_sec - start.tv_sec);
+
   edf_print_constraints_U(&my_task_set, &my_points);
   edf_print_stats(&my_points, &my_task_set, time_points, time_hull);
   if (arguments.add_constraints_info)
@@ -463,7 +469,12 @@ void main_rand_mode() {
     /* verbose output*/
     edf_print_points(&my_points);
   }
-  time_hull = edf_linprog_points(&my_points);
+
+  clock_gettime(CLOCK_MONOTONIC, &start);
+  edf_linprog_points(&my_points, 0);
+  clock_gettime(CLOCK_MONOTONIC, &check);
+  time_hull =
+      (check.tv_nsec - start.tv_nsec) * 1e-9 + (check.tv_sec - start.tv_sec);
 
   if (rand_setup.n_repeat == 1) {
     edf_print_constraints_C(&my_points);
@@ -503,7 +514,7 @@ void main_constraints_info() {
   if (arguments.verbose) { /* verbose output*/
     edf_print_points(&my_points);
   }
-  edf_linprog_points(&my_points);
+  edf_linprog_points(&my_points, 0);
   edf_print_additional_info_on_csv(&my_points, &my_task_set, rand_setup.seed);
 
   /*Free memory*/

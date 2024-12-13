@@ -66,10 +66,13 @@ void edf_print_constraints_C(const edf_points_t *cur_points);
 void edf_print_constraints_U(const ts_t *cur_task_set,
                              const edf_points_t *cur_points);
 
-/*
+/**
  * It selects the only necessary points using linear programming.
+ * Returns 1 if the Utilization Constraint is necessary, 0 otherwise.
  */
-double edf_linprog_points(edf_points_t *cur_points);
+unsigned int edf_linprog_points(edf_points_t *cur_points, unsigned int disp);
+
+#define ALGO_NAME "Constraint-Induced Convex Hull Algorithm"
 
 /*
  * Free the data structure storing the points
