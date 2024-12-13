@@ -1,3 +1,7 @@
 #modules/qhull/*
 .vscode/
 qhull
+*.o
+edf_hull
+data*txt
+
