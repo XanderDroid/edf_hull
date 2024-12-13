@@ -4,4 +4,4 @@ qhull
 *.o
 edf_hull
 data*txt
-
+*lp
