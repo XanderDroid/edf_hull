@@ -94,11 +94,11 @@ void edf_create_points(const ts_t *cur_task_set, edf_points_t *cur_points) {
     for (j = 0; j < N; j++) {
       cur_points->vec_p[point_count * N + j] = ((i == j) ? -1 : 0);
     }
-    
+
     /* increment the point counter */
     point_count++;
   }
-  
+
   /* store the sum Ui <= 1 constraint */
   cur_points->t0[point_count] = 0;
   cur_points->t1[point_count] = cur_task_set->h_per;
@@ -383,7 +383,9 @@ unsigned int edf_linprog_points(edf_points_t *cur_points, unsigned int disp) {
    }
 
    /* Saving the problem as a CPLEX LP human-readable file. */
-   glp_write_lp(lp, NULL, "before.lp");
+   if(disp) {
+      glp_write_lp(lp, NULL, "before.lp");
+   }
 
    /**
     * SECOND PASS - Checking and eventually removing all inserted constraints.
@@ -483,7 +485,9 @@ unsigned int edf_linprog_points(edf_points_t *cur_points, unsigned int disp) {
    }
 
    /* Saving the problem as a CPLEX LP human-readable file. */
-   glp_write_lp(lp, NULL, "after.lp");
+   if(disp) {
+      glp_write_lp(lp, NULL, "after.lp");
+   }
 
    /* Cleaning up stuff. */
    glp_delete_prob(lp);

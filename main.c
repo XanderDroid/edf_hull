@@ -423,7 +423,7 @@ void main_file_mode(char *input_filename) {
   }
 
   clock_gettime(CLOCK_MONOTONIC, &start);
-  edf_linprog_points(&my_points, 1);
+  edf_linprog_points(&my_points, 0);
   clock_gettime(CLOCK_MONOTONIC, &check);
   time_hull =
       (check.tv_nsec - start.tv_nsec) * 1e-9 + (check.tv_sec - start.tv_sec);

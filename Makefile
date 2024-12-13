@@ -11,4 +11,4 @@ edf_hull: edf_hull.o ts_lib.o main.c main.h  Makefile
 	$(CC) -g -O0  main.c edf_hull.o ts_lib.o -lglpk -lm -o edf_hull
 
 clean:
-	rm -rf *.o *~ edf_hull edf_debug_qhull.txt
+	rm -rf *.o *.lp *~ edf_hull edf_debug_qhull.txt
