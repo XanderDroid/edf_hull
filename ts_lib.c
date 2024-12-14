@@ -83,10 +83,12 @@ static void store_max_dl_phi(ts_t *cur_ts) {
 }
 
 void ts_set_zero(ts_t *cur_ts) {
-  cur_ts->num = 0;
+
+  bzero(cur_ts, sizeof(*cur_ts));
+  /*  cur_ts->num = 0;
   cur_ts->per = NULL;
   cur_ts->dl = NULL;
-  cur_ts->phi = NULL;
+  cur_ts->phi = NULL; */
 }
 
 void ts_realloc(ts_t *cur_ts) {
@@ -143,6 +145,7 @@ void ts_read_alloc(ts_t *cur_ts, char *input_filename) {
 void ts_rand(ts_t *cur_ts, const ts_rand_t *settings) {
   unsigned int i;
 
+  /* Generating periods */
   switch (settings->per_m) {
   case per_null:
     fprintf(stderr,
@@ -193,6 +196,8 @@ void ts_rand(ts_t *cur_ts, const ts_rand_t *settings) {
     return;
   }
 
+  cur_ts->eps = settings->eps;
+  
   compute_hyperperiod(cur_ts);
   store_max_dl_phi(cur_ts);
 }
