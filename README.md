@@ -12,7 +12,7 @@ This work is dedicated to the memory of Laurent George, who prematurely passed a
 
 If you are lucky and want to run it first then understand it later, compile the code with the following commands:
 
-- `git clone --recurse-submodules git@github.com:ebni/edf_hull.git`
+- `sudo apt install libglpk-dev`
 - `cd edf_hull`
 - `make all`
 

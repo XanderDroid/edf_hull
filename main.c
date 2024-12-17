@@ -574,7 +574,7 @@ void edf_print_additional_info_on_csv(edf_points_t *my_points,
 
   char *filename = malloc(MAX_SIZE_STR_FILENAME);
 
-  sprintf(filename, "../datasets/additional_info/n-%d_m-%d.csv",
+  sprintf(filename, "datasets/additional_info/n-%d_m-%d.csv",
           my_task_set->num, actual_m);
 
   FILE *fp = fopen(filename, "w");

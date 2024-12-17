@@ -1,3 +1,14 @@
+5
+1e-100
+101 98 0
+62 58 0
+12 13 0
+23 21 0
+51 54 0
+2 3 0
+5 4 0
+
+
 3
 1e-100
 2 3 0
@@ -5,17 +16,6 @@
 7 6 0
 (example2.fig of the RTCSA19 paper, presentation)
 
-3
-1e-100
-2 2 0
-5 5 0
-7 6 0
-(example1.fig of the RTCSA19 paper, presentation)
-
-2
-1e-100
-2 3 0
-5 4 0
 
 2
 1e-100

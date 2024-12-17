@@ -17,8 +17,8 @@
  * [AD] Define this macro as "glp_simplex" if you want traditional simplex, or
  * as "glp_exact" if you prefer GLPK exact rational solver.
  */
-/* #define SOLVE_METHOD glp_simplex */
-#define SOLVE_METHOD glp_exact
+#define SOLVE_METHOD glp_simplex
+/* #define SOLVE_METHOD glp_exact */
 
 void edf_set_zero(edf_points_t *cur_points) {
   cur_points->alloc_points = 0;
@@ -49,27 +49,27 @@ void edf_create_points(const ts_t *cur_task_set, edf_points_t *cur_points) {
   /* Reserve one point for sum_i U_i <= 1, N points for the Ci >= 0 */
   reserve_p = N + 1;
 
-  /* Limit until which computing the points + number of points */
+  /* Limit until which computing the points */
   if (cur_task_set->has_phi) {
     big_enough =
         2 * cur_task_set->h_per + cur_task_set->max_d + cur_task_set->max_o;
-    /* the number of points (overestimating it) */
-    cur_points->num_points = reserve_p + num_deadline * num_deadline;
   } else {
     big_enough = cur_task_set->h_per + cur_task_set->max_d;
-    /* the number of points */
-    cur_points->num_points = reserve_p + num_deadline;
   }
 
-  /*
-   * Maximum job of the tasks. Also compute the sum of max_job[i],
-   * because this is also the number of considered deadlines.
-   */
+  /* Maximum job of the tasks, and number of tot abs deadlines */
   max_job = malloc(sizeof(*max_job) * N);
   num_deadline = 0;
   for (i = 0; i < N; i++) {
     max_job[i] = (unsigned long)floor((big_enough - O(i) - D(i)) / T(i));
     num_deadline += max_job[i] + 1;
+  }
+
+  /* Number of absolute deadlines  */
+  if (cur_task_set->has_phi) {
+    cur_points->num_points = reserve_p + num_deadline * num_deadline;
+  } else {
+    cur_points->num_points = reserve_p + num_deadline;
   }
 
   /* allocate the t0, t1 data structure for the points */
